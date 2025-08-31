@@ -19,7 +19,7 @@ Challenge yourself against the computer AI or just enjoy the clean design and sm
 ## Screenshots
 
 <p align="center">
-  <img src="screenshots/splashscreen.png" width="250" />
+  <img src="screenshots/splashScreen.png" width="250" />
   <br/>
   <br/>
   <img src="screenshots/gameplay.png" width="250" />
