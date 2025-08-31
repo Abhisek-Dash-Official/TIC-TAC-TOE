@@ -86,32 +86,71 @@ class Game : AppCompatActivity() {
     }
 
     fun computerMove() {
-        // find all empty cells
-        val emptyCells = gameState.mapIndexed { index, value -> if (value == 2) index else null }
-            .filterNotNull()
-
-        if (emptyCells.isNotEmpty()) {
-            val choice = emptyCells.random() // random cell
-            gameState[choice] = currentPlayer
-
-            // Find ImageView by tag
-            val gridCell = findViewById<ImageView>(cellIds[choice])
-
-            if (currentPlayer == 0) {
-                gridCell.setImageResource(R.drawable.o)
-            } else {
-                gridCell.setImageResource(R.drawable.x)
+        // Step 1: Block opponent
+        val opponent = if (currentPlayer == 0) 1 else 0
+        for (pos in winPositions) {
+            val a = pos[0]; val b = pos[1]; val c = pos[2]
+            if (gameState[a] == opponent && gameState[b] == opponent && gameState[c] == 2) {
+                makeMove(c); return
             }
-
-            // Check Draw or winner
-            if(checkDraw())return
-            if (checkWinner()) return
-
-            // Switch back to player
-            currentPlayer = if (currentPlayer == 0) 1 else 0
-            val statusText = if (currentPlayer == 0) "O" else "X"
-            statusDisplay.text = "Player $statusText's Turn"
+            if (gameState[a] == opponent && gameState[c] == opponent && gameState[b] == 2) {
+                makeMove(b); return
+            }
+            if (gameState[b] == opponent && gameState[c] == opponent && gameState[a] == 2) {
+                makeMove(a); return
+            }
         }
+
+        // Step 2: Take center
+        if (gameState[4] == 2) {
+            makeMove(4); return
+        }
+
+        // Step 3: try to win
+        for (pos in winPositions) {
+            val a = pos[0]; val b = pos[1]; val c = pos[2]
+            if (gameState[a] == currentPlayer && gameState[b] == currentPlayer && gameState[c] == 2) {
+                makeMove(c); return
+            }
+            if (gameState[a] == currentPlayer && gameState[c] == currentPlayer && gameState[b] == 2) {
+                makeMove(b); return
+            }
+            if (gameState[b] == currentPlayer && gameState[c] == currentPlayer && gameState[a] == 2) {
+                makeMove(a); return
+            }
+        }
+
+        // Step 4: Take corners
+        val corners = listOf(0, 2, 6, 8).filter { gameState[it] == 2 }
+        if (corners.isNotEmpty()) {
+            makeMove(corners.random()); return
+        }
+
+        // Step 5: Take any side
+        val sides = listOf(1, 3, 5, 7).filter { gameState[it] == 2 }
+        if (sides.isNotEmpty()) {
+            makeMove(sides.random()); return
+        }
+    }
+
+    // Helper function to actually place move
+    private fun makeMove(choice: Int) {
+        gameState[choice] = currentPlayer
+        val gridCell = findViewById<ImageView>(cellIds[choice])
+
+        if (currentPlayer == 0) {
+            gridCell.setImageResource(R.drawable.o)
+        } else {
+            gridCell.setImageResource(R.drawable.x)
+        }
+
+        if (checkDraw()) return
+        if (checkWinner()) return
+
+        // Switch turn back
+        currentPlayer = if (currentPlayer == 0) 1 else 0
+        val statusText = if (currentPlayer == 0) "O" else "X"
+        statusDisplay.text = "Player $statusText's Turn"
     }
     fun playerClick(view: View) {
         val img = view as ImageView
